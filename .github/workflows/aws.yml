@@ -1,0 +1,35 @@
+on:
+  push:
+    branches: [master,develop]
+
+name: Deploy to GitHubPackages
+
+jobs:
+
+  # Scan-Code:
+  #   name: Scan-Code
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v2
+  #     - uses: UnicornGlobal/trufflehog-actions-scan@master
+  #       with:
+  #         branch: ${{ github.head_ref }}      
+
+  Publish-NPM-Package:
+    # needs: [Scan-Code]
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12
+          cache-dependency-path: components/package-lock.json
+          registry-url: https://npm.pkg.github.com
+      - run: npm install
+      - run: npm ci
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{secrets.PAT_GITHUB_RW_REPOS}}
